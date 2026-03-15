@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<title>AI Generated Text Detector</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+<div class="nav-left">
+<a href="#">Home</a>
+<a href="#">Technology</a>
+<a href="#">Analyze</a>
+<a href="#">Models</a>
+</div>
+
+</nav>
+
+
+<header class="header-title">
+
+<h1>AI Generated Text Detector</h1>
+
+<p class="project-desc">
+This platform analyzes written content using machine learning models to determine whether the text is AI-generated or written by a human.
+</p>
+
+</header>
+
+
+<div class="container">
+
+<div class="editor-wrapper">
+<div id="editor"></div>
+</div>
+
+<button id="analyzeBtn">Analyze Text</button>
+
+<div id="resultBox" class="result-box">
+
+<h2 id="result">Result will appear here</h2>
+
+<p id="aiPercent"></p>
+<p id="humanPercent"></p>
+
+</div>
+
+</div>
+
+
+
+<section class="graph-slider">
+
+<div class="graph-card">
+<h3>AI vs Human</h3>
+<canvas id="probChart"></canvas>
+</div>
+
+<div class="graph-card">
+<h3>Detection Trend</h3>
+<canvas id="trendChart"></canvas>
+</div>
+
+<div class="graph-card">
+<h3>Model Scores</h3>
+<canvas id="modelChart"></canvas>
+</div>
+
+</section>
+
+
+
+<section class="info-slider">
+
+<div class="info-card">
+
+<h3>Technology</h3>
+
+<ul>
+<li>NLP</li>
+<li>TF-IDF</li>
+<li>Pattern Detection</li>
+<li>ML Ensemble</li>
+</ul>
+
+</div>
+
+<div class="info-card">
+
+<h3>Models Used</h3>
+
+<ul>
+<li>Logistic Regression</li>
+<li>SVM</li>
+<li>Random Forest</li>
+<li>XGBoost</li>
+</ul>
+
+</div>
+
+<div class="info-card">
+
+<h3>Dataset</h3>
+
+<ul>
+<li>44K Text Samples</li>
+<li>AI + Human Data</li>
+<li>Multiple Writing Styles</li>
+</ul>
+
+</div>
+
+<div class="info-card">
+
+<h3>Accuracy</h3>
+
+<ul>
+<li>~99% Accuracy</li>
+<li>High Precision Detection</li>
+</ul>
+
+</div>
+
+</section>
+
+
+
+<footer>
+
+<p class="project-line">
+This website demonstrates how machine learning models can analyze linguistic patterns to identify AI-generated content.
+</p>
+
+<p>
+"Artificial Intelligence is a powerful tool that enhances human creativity and decision making."
+</p>
+
+</footer>
+
+
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<script>
+
+var quill = new Quill('#editor',{
+
+theme:'snow',
+
+placeholder:'Paste your text here to analyze whether it is AI generated or human written...',
+
+modules:{
+toolbar:[
+['bold','italic','underline'],
+[{ 'header':[1,2,3,false] }],
+[{ 'list':'ordered'},{ 'list':'bullet'}],
+['link'],
+['clean']
+]
+}
+
+})
+
+</script>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
