@@ -1,6 +1,6 @@
 flask
-gunicorn
+requests
 scikit-learn
-xgboost
-pandas
 numpy
+pandas
+gunicorn
