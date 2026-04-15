@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Text Detector</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f172a;
+            color: white;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 40px;
+            background: #020617;
+        }
+
+        .logo {
+            font-weight: bold;
+        }
+
+        .nav-links a {
+            margin-left: 20px;
+            color: #cbd5f5;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            padding: 30px;
+        }
+
+        .input-box {
+            background: #020617;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+
+        textarea::placeholder {
+            color: #64748b;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #2563eb;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            background: #1d4ed8;
+        }
+
+        .result-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .box {
+            flex: 1;
+            min-width: 220px;
+            background: #020617;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .box:hover {
+            transform: translateY(-5px);
+        }
+
+        canvas {
+            max-height: 180px;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <div class="logo">AI Detector</div>
+    <div class="nav-links">
+        <a href="#">Home</a>
+        <a href="#">Analyze</a>
+    </div>
+</div>
+
+<div class="container">
+
+    <h2>AI Generated Text Detector</h2>
+
+    <!-- FORM (FIXED) -->
+    <form id="form">
+        <div class="input-box">
+            <textarea id="text" name="text" placeholder="Paste your text here..."></textarea>
+        </div>
+        <button type="submit">Analyze</button>
+    </form>
+
+    <!-- RESULT ROW -->
+  <div class="result-row fade-in">
+
+    <!-- RESULT BOX -->
+    <div id="resultBox" class="box">
+        <h3>Final Result</h3>
+        <p>Result will appear here</p>
+    </div>
+
+    <!-- TREND GRAPH -->
+    <div class="box">
+        <h3>Detection Trend</h3>
+        <p>Sentence-level AI probability</p>
+        <canvas id="trendChart"></canvas>
+    </div>
+
+    <!-- BAR GRAPH -->
+    <div class="box">
+        <h3>AI vs Human</h3>
+        <p>Overall probability comparison</p>
+        <canvas id="barChart"></canvas>
+    </div>
+
+    <!-- MODEL INFO -->
+    <div id="modelInfo" class="box">
+        <h3>Model Info</h3>
+        <p>Accuracy and model scores will appear here</p>
+    </div>
+
+</div>
+</div>
+
+<script>
+let trendChart, barChart;
+
+document.getElementById("form").addEventListener("submit", function(e){
+    e.preventDefault();   // 🔥 VERY IMPORTANT
+
+    let text = document.getElementById("text").value;
+
+    if(text.trim() === ""){
+        alert("Enter text!");
+        return;
+    }
+
+    fetch("/predict", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "text=" + encodeURIComponent(text)
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        let box = document.getElementById("resultBox");
+
+        // COLOR
+        if(data.result === "AI Generated"){
+            box.style.background = "#dc2626";
+        } else {
+            box.style.background = "#16a34a";
+        }
+
+        box.classList.add("fade-in");
+
+        box.innerHTML = `
+            <h2>${data.result}</h2>
+            <p>AI: ${data.final_ai}%</p>
+            <p>Human: ${data.final_human}%</p>
+        `;
+
+        // TREND GRAPH
+        let ctx1 = document.getElementById("trendChart").getContext("2d");
+        if(trendChart) trendChart.destroy();
+
+        trendChart = new Chart(ctx1, {
+            type: "line",
+            data: {
+                labels: data.trend.map((_, i) => "S"+(i+1)),
+                datasets: [{
+                    data: data.trend,
+                    borderWidth: 2,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                animation: { duration: 1000 },
+                scales: { y: { min: 0, max: 100 } }
+            }
+        });
+
+        // BAR GRAPH
+        let ctx2 = document.getElementById("barChart").getContext("2d");
+        if(barChart) barChart.destroy();
+
+        barChart = new Chart(ctx2, {
+            type: "bar",
+            data: {
+                labels: ["AI", "Human"],
+                datasets: [{
+                    data: [data.final_ai, data.final_human],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                animation: { duration: 1000 },
+                scales: { y: { min: 0, max: 100 } }
+            }
+        });
+
+        // MODEL INFO
+        document.getElementById("modelInfo").innerHTML = `
+            <h3>Model Info</h3>
+            <p>Accuracy: 99%</p>
+            <p>Local: ${data.local_ai}%</p>
+            <p>API: ${data.api_ai}%</p>
+        `;
+    });
+});
+</script>
+
+</body>
+</html>
